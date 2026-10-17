@@ -25,7 +25,8 @@
     "plugins": [
       "expo-status-bar",
       "expo-router",
-      "expo-font"
+      "expo-font",
+      "expo-secure-store"
     ]
   }
 }
