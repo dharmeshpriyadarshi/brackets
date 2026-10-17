@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme": "brackets",
     "ios": {
       "supportsTablet": true
     },
@@ -22,7 +23,9 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-router",
+      "expo-font"
     ]
   }
 }
