@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.dharmesh_priyadarshi.brackets"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -27,6 +28,12 @@
       "expo-router",
       "expo-font",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9484b91c-613d-4457-8829-103be679b4e6"
+      }
+    }
   }
 }
