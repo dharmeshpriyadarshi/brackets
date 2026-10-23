@@ -164,18 +164,37 @@ const renderBracket = ({ item }: { item: Bracket }) => {
 
   return (
     <View className="mb-5 rounded-2xl border border-gray-200 bg-white py-4 dark:border-gray-700 dark:bg-gray-800">
-      {/* Compact Bracket Title */}
-      <View className="mb-4 flex-row items-start px-4">
-        <Text className="mr-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
-          {"{"}
-        </Text>
-        <Text className="flex-shrink text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-          {item.name}
-        </Text>
-        <Text className="ml-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
-          {"}"}
-        </Text>
-      </View>
+      
+{/* Bracket Header: Title Left, Actions Right */}
+<View className="mb-4 flex-row items-center justify-between px-4">
+  <View className="mr-3 flex-1 flex-row flex-wrap items-start">
+    <Text className="mr-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
+      {"{"}
+    </Text>
+
+    <Text className="flex-shrink text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+      {item.name}
+    </Text>
+
+    <Text className="ml-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
+      {"}"}
+    </Text>
+  </View>
+
+  <TouchableOpacity
+    className="h-10 w-12 items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/30"
+    onPress={() =>
+      alert(`Actions for bracket "${item.name}"`)
+    }
+    accessibilityRole="button"
+    accessibilityLabel={`Open actions for ${item.name}`}
+  >
+    <Text className="text-base font-bold text-indigo-600 dark:text-indigo-400">
+      {"{ }"}
+    </Text>
+  </TouchableOpacity>
+</View>
+
 
       {/* Vertically Stacked Spaces with Universal Actions */}
       <View className="gap-3 px-3">
