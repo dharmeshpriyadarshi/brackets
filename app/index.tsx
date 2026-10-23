@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   RefreshControl,
   Text,
@@ -181,18 +182,53 @@ const renderBracket = ({ item }: { item: Bracket }) => {
     </Text>
   </View>
 
-  <TouchableOpacity
-    className="h-10 w-12 items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/30"
-    onPress={() =>
-      alert(`Actions for bracket "${item.name}"`)
+  
+<TouchableOpacity
+  className="h-10 w-12 items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/30"
+  onPress={() => {
+    if (isOwner) {
+      Alert.alert(
+        "Manage Bracket",
+        `Choose an action for "${item.name}".`,
+        [
+          {
+            text: "Add a space",
+            onPress: () =>
+              console.log(`Add space to bracket: ${item.id}`),
+          },
+          {
+            text: "Rename bracket",
+            onPress: () =>
+              console.log(`Rename bracket: ${item.id}`),
+          },
+          {
+            text: "Delete bracket",
+            style: "destructive",
+            onPress: () =>
+              console.log(`Delete bracket: ${item.id}`),
+          },
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+        ]
+      );
+    } else {
+      Alert.alert(
+        item.name,
+        "Viewer actions will be available in the next minitask.",
+        [{ text: "OK" }]
+      );
     }
-    accessibilityRole="button"
-    accessibilityLabel={`Open actions for ${item.name}`}
-  >
-    <Text className="text-base font-bold text-indigo-600 dark:text-indigo-400">
-      {"{ }"}
-    </Text>
-  </TouchableOpacity>
+  }}
+  accessibilityRole="button"
+  accessibilityLabel={`Open actions for ${item.name}`}
+>
+  <Text className="text-base font-bold text-indigo-600 dark:text-indigo-400">
+    {"{ }"}
+  </Text>
+</TouchableOpacity>
+
 </View>
 
 
