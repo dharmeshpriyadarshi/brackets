@@ -331,7 +331,7 @@ const renderBracket = ({ item }: { item: Bracket }) => {
     setConfirmDeleteBracket(false);
   }}
 >
-  <View className="flex-1 justify-end bg-black/50">
+  <View className="flex-1 items-center justify-center bg-black/50 px-5 py-8">
     <Pressable
       className="absolute inset-0"
       onPress={() => {
@@ -342,7 +342,7 @@ const renderBracket = ({ item }: { item: Bracket }) => {
     />
 
     {selectedBracket && (
-      <View className="rounded-t-3xl border border-gray-200 bg-white px-5 pb-8 pt-3 dark:border-gray-700 dark:bg-gray-900">
+      <View className="w-full max-w-md rounded-3xl border border-gray-200 bg-white px-5 pb-6 pt-3 dark:border-gray-700 dark:bg-gray-900">
         <View className="mb-5 items-center">
           <View className="h-1.5 w-12 rounded-full bg-gray-300 dark:bg-gray-600" />
         </View>
