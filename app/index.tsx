@@ -153,19 +153,18 @@ export default function HomeScreen() {
   }
 
 
+
   const renderBracket = ({ item }: { item: Bracket }) => {
-    // Sort a copy so the original array is not mutated.
     const spaces = [...(item.bracket_spaces ?? [])].sort(
       (a, b) => a.sequence_order - b.sequence_order
     );
 
-    // Only the bracket creator can see the add-content button.
     const isOwner = session?.user?.id === item.creator_id;
 
     return (
-      <View className="mb-4 border-y border-gray-100 bg-white py-4 dark:border-gray-700 dark:bg-gray-800">
+      <View className="mb-5 rounded-2xl border border-gray-200 bg-white py-4 dark:border-gray-700 dark:bg-gray-800">
         {/* Bracket Header */}
-        <View className="mb-4 flex-row items-center px-5">
+        <View className="mb-4 flex-row items-center px-4">
           <Text className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
             {"{ "}
           </Text>
@@ -179,47 +178,59 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        {/* Horizontally Swipeable Spaces */}
-        <FlatList
-          data={spaces}
-          horizontal
-          nestedScrollEnabled
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={316}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          contentContainerStyle={{ paddingHorizontal: 12 }}
-          keyExtractor={(space) => space.id}
-          renderItem={({ item: space }) => (
-            <View className="mx-2 min-h-[160px] w-[300px] justify-center rounded-3xl border border-gray-200 bg-gray-50 p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-              <Text className="text-center text-base font-medium leading-relaxed text-gray-800 dark:text-gray-200">
-                {space.content ??
-                  `${space.media_type} content`}
-              </Text>
+        {/* Vertically Stacked Spaces */}
+        <View className="gap-3 px-3">
+          {spaces.map((space, index) => (
+            <View key={space.id}>
+              <View className="min-h-[80px] w-full justify-center rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
+                {space.media_type === "text" ? (
+                  <Text className="text-base leading-6 text-gray-800 dark:text-gray-200">
+                    {space.content || "This space has no text yet."}
+                  </Text>
+                ) : (
+                  <Text className="text-sm text-gray-500 dark:text-gray-400">
+                    {space.media_type} content
+                  </Text>
+                )}
+              </View>
+
+              {index < spaces.length - 1 && (
+                <View className="ml-5 mt-1 h-3 w-px bg-indigo-300 dark:bg-indigo-700" />
+              )}
             </View>
-          )}
-          ListFooterComponent={
-            isOwner ? (
-              <TouchableOpacity
-                className="mx-2 min-h-[160px] w-[100px] items-center justify-center rounded-3xl border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/30"
-                onPress={() =>
-                  console.log(
-                    `Trigger Add Space Modal for Bracket: ${item.id}`
-                  )
-                }
-                accessibilityRole="button"
-                accessibilityLabel={`Add content to ${item.name}`}
-              >
-                <Text className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
-                  +
-                </Text>
-              </TouchableOpacity>
-            ) : null
-          }
-        />
+          ))}
+        </View>
+
+        {spaces.length === 0 && (
+          <Text className="px-4 py-3 text-gray-500 dark:text-gray-400">
+            No spaces in this Bracket yet.
+          </Text>
+        )}
+
+        {/* Creator-only Add Content Button */}
+        {isOwner && (
+          <TouchableOpacity
+            className="mx-3 mt-3 min-h-[52px] flex-row items-center justify-center rounded-xl border border-dashed border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30"
+            onPress={() =>
+              console.log(
+                `Trigger Add Space Modal for Bracket: ${item.id}`
+              )
+            }
+            accessibilityRole="button"
+            accessibilityLabel={`Add content to ${item.name}`}
+          >
+            <Text className="mr-2 text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
+              +
+            </Text>
+            <Text className="font-medium text-indigo-600 dark:text-indigo-400">
+              Add to Bracket
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   };
+
 
 
   return (
