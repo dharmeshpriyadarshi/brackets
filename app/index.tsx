@@ -2,8 +2,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
+  Modal,
+  Pressable,
   RefreshControl,
   Text,
   TouchableOpacity,
@@ -41,6 +42,12 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const requestId = useRef(0);
+
+  const [selectedBracket, setSelectedBracket] =
+  useState<Bracket | null>(null);
+
+  const [confirmDeleteBracket, setConfirmDeleteBracket] =
+  useState(false);
 
   const fetchFeed = useCallback(async (isRefresh = false) => {
     const currentRequest = ++requestId.current;
@@ -185,42 +192,10 @@ const renderBracket = ({ item }: { item: Bracket }) => {
   
 <TouchableOpacity
   className="h-10 w-12 items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/30"
-  onPress={() => {
-    if (isOwner) {
-      Alert.alert(
-        "Manage Bracket",
-        `Choose an action for "${item.name}".`,
-        [
-          {
-            text: "Add a space",
-            onPress: () =>
-              console.log(`Add space to bracket: ${item.id}`),
-          },
-          {
-            text: "Rename bracket",
-            onPress: () =>
-              console.log(`Rename bracket: ${item.id}`),
-          },
-          {
-            text: "Delete bracket",
-            style: "destructive",
-            onPress: () =>
-              console.log(`Delete bracket: ${item.id}`),
-          },
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-        ]
-      );
-    } else {
-      Alert.alert(
-        item.name,
-        "Viewer actions will be available in the next minitask.",
-        [{ text: "OK" }]
-      );
-    }
-  }}
+ onPress={() => {
+  setConfirmDeleteBracket(false);
+  setSelectedBracket(item);
+ }}
   accessibilityRole="button"
   accessibilityLabel={`Open actions for ${item.name}`}
 >
@@ -344,6 +319,143 @@ const renderBracket = ({ item }: { item: Bracket }) => {
           ) : null
         }
       />
+
+      
+<Modal
+  visible={selectedBracket !== null}
+  transparent
+  animationType="fade"
+  statusBarTranslucent
+  onRequestClose={() => {
+    setSelectedBracket(null);
+    setConfirmDeleteBracket(false);
+  }}
+>
+  <View className="flex-1 justify-end bg-black/50">
+    <Pressable
+      className="absolute inset-0"
+      onPress={() => {
+        setSelectedBracket(null);
+        setConfirmDeleteBracket(false);
+      }}
+      accessibilityLabel="Close menu"
+    />
+
+    {selectedBracket && (
+      <View className="rounded-t-3xl border border-gray-200 bg-white px-5 pb-8 pt-3 dark:border-gray-700 dark:bg-gray-900">
+        <View className="mb-5 items-center">
+          <View className="h-1.5 w-12 rounded-full bg-gray-300 dark:bg-gray-600" />
+        </View>
+
+        {confirmDeleteBracket ? (
+          <>
+            <Text className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
+              Delete this Bracket?
+            </Text>
+
+            <Text className="mb-5 text-sm leading-5 text-gray-600 dark:text-gray-300">
+              "{selectedBracket.name}" and its spaces would be affected.
+              This action is not implemented yet.
+            </Text>
+
+            <TouchableOpacity
+              className="mb-3 items-center rounded-xl bg-red-600 px-4 py-3"
+              onPress={() => {
+                console.log(
+                  `Confirm delete bracket: ${selectedBracket.id}`
+                );
+                setConfirmDeleteBracket(false);
+                setSelectedBracket(null);
+              }}
+            >
+              <Text className="font-semibold text-white">
+                Confirm (Preview Only)
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="items-center rounded-xl border border-gray-200 px-4 py-3 dark:border-gray-700"
+              onPress={() => setConfirmDeleteBracket(false)}
+            >
+              <Text className="font-medium text-gray-800 dark:text-gray-200">
+                Go Back
+              </Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <Text className="mb-1 text-xl font-bold text-gray-900 dark:text-white">
+              {"{ "}
+              {selectedBracket.name}
+              {" }"}
+            </Text>
+
+            <Text className="mb-5 text-sm text-gray-500 dark:text-gray-400">
+              Bracket actions
+            </Text>
+
+            {session?.user?.id === selectedBracket.creator_id ? (
+              <>
+                <TouchableOpacity
+                  className="mb-2 rounded-xl bg-indigo-50 px-4 py-4 dark:bg-indigo-900/30"
+                  onPress={() => {
+                    console.log(
+                      `Add space to bracket: ${selectedBracket.id}`
+                    );
+                    setSelectedBracket(null);
+                  }}
+                >
+                  <Text className="font-semibold text-indigo-700 dark:text-indigo-300">
+                    + Add a space
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="mb-2 rounded-xl bg-gray-50 px-4 py-4 dark:bg-gray-800"
+                  onPress={() => {
+                    console.log(
+                      `Rename bracket: ${selectedBracket.id}`
+                    );
+                    setSelectedBracket(null);
+                  }}
+                >
+                  <Text className="font-medium text-gray-900 dark:text-white">
+                    Rename bracket
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="mb-2 rounded-xl bg-red-50 px-4 py-4 dark:bg-red-950"
+                  onPress={() => setConfirmDeleteBracket(true)}
+                >
+                  <Text className="font-semibold text-red-700 dark:text-red-300">
+                    Delete bracket
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <View className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
+                <Text className="text-sm leading-5 text-gray-600 dark:text-gray-300">
+                  Viewer actions will be added in the next minitask.
+                </Text>
+              </View>
+            )}
+
+            <TouchableOpacity
+              className="mt-3 items-center rounded-xl border border-gray-200 px-4 py-3 dark:border-gray-700"
+              onPress={() => setSelectedBracket(null)}
+            >
+              <Text className="font-medium text-gray-700 dark:text-gray-200">
+                Close
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+    )}
+  </View>
+</Modal>
+
     </View>
   );
 }
