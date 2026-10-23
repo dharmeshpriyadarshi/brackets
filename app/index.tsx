@@ -154,37 +154,35 @@ export default function HomeScreen() {
 
 
 
-  const renderBracket = ({ item }: { item: Bracket }) => {
-    const spaces = [...(item.bracket_spaces ?? [])].sort(
-      (a, b) => a.sequence_order - b.sequence_order
-    );
+  
+const renderBracket = ({ item }: { item: Bracket }) => {
+  const spaces = [...(item.bracket_spaces ?? [])].sort(
+    (a, b) => a.sequence_order - b.sequence_order
+  );
 
-    const isOwner = session?.user?.id === item.creator_id;
+  const isOwner = session?.user?.id === item.creator_id;
 
-    return (
-      <View className="mb-5 rounded-2xl border border-gray-200 bg-white py-4 dark:border-gray-700 dark:bg-gray-800">
-        
-{/* Compact, Adaptive Bracket Title */}
-<View className="mb-4 flex-row items-start px-4">
-  <Text className="mr-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
-    {"{"}
-  </Text>
+  return (
+    <View className="mb-5 rounded-2xl border border-gray-200 bg-white py-4 dark:border-gray-700 dark:bg-gray-800">
+      {/* Compact Bracket Title */}
+      <View className="mb-4 flex-row items-start px-4">
+        <Text className="mr-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
+          {"{"}
+        </Text>
+        <Text className="flex-shrink text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+          {item.name}
+        </Text>
+        <Text className="ml-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
+          {"}"}
+        </Text>
+      </View>
 
-  <Text className="flex-shrink text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-    {item.name}
-  </Text>
-
-  <Text className="ml-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
-    {"}"}
-  </Text>
-</View>
-
-
-        {/* Vertically Stacked Spaces */}
-        <View className="gap-3 px-3">
-          {spaces.map((space, index) => (
-            <View key={space.id}>
-              <View className="min-h-[80px] w-full justify-center rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
+      {/* Vertically Stacked Spaces with Universal Actions */}
+      <View className="gap-3 px-3">
+        {spaces.map((space, index) => (
+          <View key={space.id}>
+            <View className="flex-row items-stretch gap-2">
+              <View className="min-h-[80px] flex-1 justify-center rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
                 {space.media_type === "text" ? (
                   <Text className="text-base leading-6 text-gray-800 dark:text-gray-200">
                     {space.content || "This space has no text yet."}
@@ -196,42 +194,57 @@ export default function HomeScreen() {
                 )}
               </View>
 
-              {index < spaces.length - 1 && (
-                <View className="ml-5 mt-1 h-3 w-px bg-indigo-300 dark:bg-indigo-700" />
-              )}
+              <TouchableOpacity
+                className="min-h-[80px] w-12 items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/30"
+                onPress={() =>
+                  alert(
+                    `Actions for space ${space.sequence_order + 1} in "${item.name}"`
+                  )
+                }
+                accessibilityRole="button"
+                accessibilityLabel={`Open actions for space ${space.sequence_order + 1} in ${item.name}`}
+              >
+                <Text className="text-base font-bold text-indigo-600 dark:text-indigo-400">
+                  {"{ }"}
+                </Text>
+              </TouchableOpacity>
             </View>
-          ))}
-        </View>
 
-        {spaces.length === 0 && (
-          <Text className="px-4 py-3 text-gray-500 dark:text-gray-400">
-            No spaces in this Bracket yet.
-          </Text>
-        )}
-
-        {/* Creator-only Add Content Button */}
-        {isOwner && (
-          <TouchableOpacity
-            className="mx-3 mt-3 min-h-[52px] flex-row items-center justify-center rounded-xl border border-dashed border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30"
-            onPress={() =>
-              console.log(
-                `Trigger Add Space Modal for Bracket: ${item.id}`
-              )
-            }
-            accessibilityRole="button"
-            accessibilityLabel={`Add content to ${item.name}`}
-          >
-            <Text className="mr-2 text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
-              +
-            </Text>
-            <Text className="font-medium text-indigo-600 dark:text-indigo-400">
-              Add to Bracket
-            </Text>
-          </TouchableOpacity>
-        )}
+            {index < spaces.length - 1 && (
+              <View className="ml-5 mt-1 h-3 w-px bg-indigo-300 dark:bg-indigo-700" />
+            )}
+          </View>
+        ))}
       </View>
-    );
-  };
+
+      {spaces.length === 0 && (
+        <Text className="px-4 py-3 text-gray-500 dark:text-gray-400">
+          No spaces in this Bracket yet.
+        </Text>
+      )}
+
+      {/* Temporary creator-only add button; replaced by the action menu later */}
+      {isOwner && (
+        <TouchableOpacity
+          className="mx-3 mt-3 min-h-[52px] flex-row items-center justify-center rounded-xl border border-dashed border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30"
+          onPress={() =>
+            console.log(`Trigger Add Space Modal for Bracket: ${item.id}`)
+          }
+          accessibilityRole="button"
+          accessibilityLabel={`Add content to ${item.name}`}
+        >
+          <Text className="mr-2 text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
+            +
+          </Text>
+          <Text className="font-medium text-indigo-600 dark:text-indigo-400">
+            Add to Bracket
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
 
 
 
