@@ -163,20 +163,22 @@ export default function HomeScreen() {
 
     return (
       <View className="mb-5 rounded-2xl border border-gray-200 bg-white py-4 dark:border-gray-700 dark:bg-gray-800">
-        {/* Bracket Header */}
-        <View className="mb-4 flex-row items-center px-4">
-          <Text className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-            {"{ "}
-          </Text>
+        
+{/* Compact, Adaptive Bracket Title */}
+<View className="mb-4 flex-row items-start px-4">
+  <Text className="mr-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
+    {"{"}
+  </Text>
 
-          <Text className="flex-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-            {item.name}
-          </Text>
+  <Text className="flex-shrink text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+    {item.name}
+  </Text>
 
-          <Text className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-            {" }"}
-          </Text>
-        </View>
+  <Text className="ml-1 text-xl font-bold text-indigo-600 dark:text-indigo-400">
+    {"}"}
+  </Text>
+</View>
+
 
         {/* Vertically Stacked Spaces */}
         <View className="gap-3 px-3">
