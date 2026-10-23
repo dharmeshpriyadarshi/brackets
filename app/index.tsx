@@ -213,20 +213,7 @@ const renderBracket = ({ item }: { item: Bracket }) => {
                 )}
               </View>
 
-              <TouchableOpacity
-                className="min-h-[80px] w-12 items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/30"
-                onPress={() =>
-                  alert(
-                    `Actions for space ${space.sequence_order + 1} in "${item.name}"`
-                  )
-                }
-                accessibilityRole="button"
-                accessibilityLabel={`Open actions for space ${space.sequence_order + 1} in ${item.name}`}
-              >
-                <Text className="text-base font-bold text-indigo-600 dark:text-indigo-400">
-                  {"{ }"}
-                </Text>
-              </TouchableOpacity>
+              
             </View>
 
             {index < spaces.length - 1 && (
