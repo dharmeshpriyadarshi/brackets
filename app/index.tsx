@@ -433,13 +433,48 @@ const renderBracket = ({ item }: { item: Bracket }) => {
                   </Text>
                 </TouchableOpacity>
               </>
-            ) : (
-              <View className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
-                <Text className="text-sm leading-5 text-gray-600 dark:text-gray-300">
-                  Viewer actions will be added in the next minitask.
-                </Text>
-              </View>
-            )}
+            
+) : (
+  <>
+    {[
+      { label: "Follow creator", icon: "+" },
+      { label: "Follow this bracket", icon: "↗" },
+      { label: "Reshare bracket", icon: "⤴" },
+      { label: "Save to profile", icon: "♡" },
+      { label: "Private save", icon: "🔒" },
+      { label: "Copy link", icon: "↗" },
+      { label: "Report bracket", icon: "!" },
+    ].map((action) => (
+      <TouchableOpacity
+        key={action.label}
+        className={`mb-2 rounded-xl px-4 py-4 ${
+          action.label === "Report bracket"
+            ? "bg-red-50 dark:bg-red-950"
+            : "bg-gray-50 dark:bg-gray-800"
+        }`}
+        onPress={() => {
+          console.log(
+            `Viewer action: ${action.label}; bracket: ${selectedBracket.id}`
+          );
+          setSelectedBracket(null);
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={action.label}
+      >
+        <Text
+          className={`font-medium ${
+            action.label === "Report bracket"
+              ? "text-red-700 dark:text-red-300"
+              : "text-gray-900 dark:text-white"
+          }`}
+        >
+          {action.icon} {action.label}
+        </Text>
+      </TouchableOpacity>
+    ))}
+  </>
+)
+}
 
             <TouchableOpacity
               className="mt-3 items-center rounded-xl border border-gray-200 px-4 py-3 dark:border-gray-700"
