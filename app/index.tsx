@@ -13,6 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../src/lib/supabase";
+import * as Clipboard from "expo-clipboard";
 
 type BracketSpace = {
   id: string;
@@ -452,12 +453,26 @@ const renderBracket = ({ item }: { item: Bracket }) => {
             ? "bg-red-50 dark:bg-red-950"
             : "bg-gray-50 dark:bg-gray-800"
         }`}
-        onPress={() => {
-          console.log(
-            `Viewer action: ${action.label}; bracket: ${selectedBracket.id}`
-          );
-          setSelectedBracket(null);
-        }}
+        onPress={async () => {
+  if (action.label === "Copy link") {
+    const bracketLink =
+      `brackets://bracket/${selectedBracket.id}`;
+
+    try {
+      await Clipboard.setStringAsync(bracketLink);
+      setSelectedBracket(null);
+    } catch {
+      console.error("Could not copy the bracket link.");
+    }
+
+    return;
+  }
+
+  console.log(
+    `Viewer action: ${action.label}; bracket: ${selectedBracket.id}`
+  );
+  setSelectedBracket(null);
+}}
         accessibilityRole="button"
         accessibilityLabel={action.label}
       >
