@@ -456,11 +456,12 @@ const renderBracket = ({ item }: { item: Bracket }) => {
         onPress={async () => {
   if (action.label === "Copy link") {
     const bracketLink =
-      `brackets://bracket/${selectedBracket.id}`;
+  `brackets://bracket/${selectedBracket.id}`;
 
     try {
       await Clipboard.setStringAsync(bracketLink);
-      setSelectedBracket(null);
+setSelectedBracket(null);
+router.push(`/bracket/${selectedBracket.id}`);
     } catch {
       console.error("Could not copy the bracket link.");
     }
