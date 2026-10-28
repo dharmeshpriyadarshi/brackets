@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 import { View } from "react-native";
 import Header from "../src/components/Header";
 import CreationModal from "../src/components/CreationModal";
@@ -14,7 +14,10 @@ export default function RootLayout() {
       <Header onOpenCreate={() => setModalVisible(true)} />
 
       <View className="mt-24 flex-1">
-        <Slot />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="bracket/[id]" />
+        </Stack>
       </View>
 
       <CreationModal
