@@ -128,3 +128,88 @@ USING (
       AND b.creator_id = (SELECT auth.uid())
   )
 );
+
+
+-- =========================================================
+-- TASK 11: FOLLOW GRAPH ARCHITECTURE
+-- =========================================================
+
+-- 1. User-to-user follow relationships.
+CREATE TABLE public.user_followers (
+  follower_id uuid NOT NULL
+    REFERENCES auth.users(id) ON DELETE CASCADE,
+  following_id uuid NOT NULL
+    REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL
+    DEFAULT timezone('utc'::text, now()),
+
+  PRIMARY KEY (follower_id, following_id),
+
+  -- Prevent users from following themselves.
+  CONSTRAINT user_followers_no_self_follow
+    CHECK (follower_id <> following_id)
+);
+
+-- 2. User-to-bracket follow relationships.
+CREATE TABLE public.bracket_followers (
+  user_id uuid NOT NULL
+    REFERENCES auth.users(id) ON DELETE CASCADE,
+  bracket_id uuid NOT NULL
+    REFERENCES public.brackets(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL
+    DEFAULT timezone('utc'::text, now()),
+
+  PRIMARY KEY (user_id, bracket_id)
+);
+
+-- 3. Enable Row-Level Security.
+ALTER TABLE public.user_followers
+ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.bracket_followers
+ENABLE ROW LEVEL SECURITY;
+
+-- 4. User follow policies.
+CREATE POLICY "Follows are viewable by everyone."
+ON public.user_followers
+FOR SELECT
+TO anon, authenticated
+USING (true);
+
+CREATE POLICY "Users can manage their own follows."
+ON public.user_followers
+FOR ALL
+TO authenticated
+USING (auth.uid() = follower_id)
+WITH CHECK (auth.uid() = follower_id);
+
+-- 5. Bracket follow policies.
+CREATE POLICY "Bracket follows are viewable by everyone."
+ON public.bracket_followers
+FOR SELECT
+TO anon, authenticated
+USING (true);
+
+CREATE POLICY "Users can manage their own bracket follows."
+ON public.bracket_followers
+FOR ALL
+TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- 6. Grant database privileges to application roles.
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+
+GRANT SELECT ON TABLE public.user_followers
+TO anon, authenticated;
+
+GRANT SELECT ON TABLE public.bracket_followers
+TO anon, authenticated;
+
+GRANT INSERT, UPDATE, DELETE
+ON TABLE public.user_followers
+TO authenticated;
+
+GRANT INSERT, UPDATE, DELETE
+ON TABLE public.bracket_followers
+TO authenticated;
