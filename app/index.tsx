@@ -42,6 +42,14 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [followFeedback, setFollowFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const [followLoading, setFollowLoading] = useState(false);
+
   const requestId = useRef(0);
 
   const [selectedBracket, setSelectedBracket] =
@@ -163,7 +171,7 @@ export default function HomeScreen() {
 
 
 
-  
+
 const renderBracket = ({ item }: { item: Bracket }) => {
   const spaces = [...(item.bracket_spaces ?? [])].sort(
     (a, b) => a.sequence_order - b.sequence_order
@@ -173,7 +181,7 @@ const renderBracket = ({ item }: { item: Bracket }) => {
 
   return (
     <View className="mb-5 rounded-2xl border border-gray-200 bg-white py-4 dark:border-gray-700 dark:bg-gray-800">
-      
+
 {/* Bracket Header: Title Left, Actions Right */}
 <View className="mb-4 flex-row items-center justify-between px-4">
   <View className="mr-3 flex-1 flex-row flex-wrap items-start">
@@ -190,7 +198,7 @@ const renderBracket = ({ item }: { item: Bracket }) => {
     </Text>
   </View>
 
-  
+
 <TouchableOpacity
   className="h-10 w-12 items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/30"
  onPress={() => {
@@ -225,7 +233,7 @@ const renderBracket = ({ item }: { item: Bracket }) => {
                 )}
               </View>
 
-              
+
             </View>
 
             {index < spaces.length - 1 && (
@@ -321,7 +329,7 @@ const renderBracket = ({ item }: { item: Bracket }) => {
         }
       />
 
-      
+
 <Modal
   visible={selectedBracket !== null}
   transparent
@@ -395,6 +403,29 @@ const renderBracket = ({ item }: { item: Bracket }) => {
               Bracket actions
             </Text>
 
+
+            {/* TASK 11: Display follow action success and error feedback. */}
+            {followFeedback && (
+              <View
+                className={`mb-3 rounded-xl border px-3 py-3 ${
+                  followFeedback.type === "success"
+                  ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950"
+                  : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950"
+                }`}
+              >
+              <Text
+                className={`text-sm ${
+                  followFeedback.type === "success"
+                  ? "text-green-800 dark:text-green-300"
+                  : "text-red-800 dark:text-red-300"
+                }`}
+              >
+            {followFeedback.message}
+    </Text>
+  </View>
+)}
+
+
             {session?.user?.id === selectedBracket.creator_id ? (
               <>
                 <TouchableOpacity
@@ -434,16 +465,16 @@ const renderBracket = ({ item }: { item: Bracket }) => {
                   </Text>
                 </TouchableOpacity>
               </>
-            
+
 ) : (
   <>
     {[
       { label: "Follow creator", icon: "+" },
-      { label: "Follow this bracket", icon: "↗" },
-      { label: "Reshare bracket", icon: "⤴" },
-      { label: "Save to profile", icon: "♡" },
-      { label: "Private save", icon: "🔒" },
-      { label: "Copy link", icon: "↗" },
+      { label: "Follow this bracket", icon: "Ã¢â€ â€”" },
+      { label: "Reshare bracket", icon: "Ã¢Â¤Â´" },
+      { label: "Save to profile", icon: "Ã¢â„¢Â¡" },
+      { label: "Private save", icon: "Ã°Å¸â€â€™" },
+      { label: "Copy link", icon: "Ã¢â€ â€”" },
       { label: "Report bracket", icon: "!" },
     ].map((action) => (
       <TouchableOpacity
@@ -453,27 +484,124 @@ const renderBracket = ({ item }: { item: Bracket }) => {
             ? "bg-red-50 dark:bg-red-950"
             : "bg-gray-50 dark:bg-gray-800"
         }`}
-        onPress={async () => {
-  if (action.label === "Copy link") {
-    const bracketLink =
-  `brackets://bracket/${selectedBracket.id}`;
+
+onPress={async () => {
+  // Guard against the selected bracket changing or being dismissed.
+  if (!selectedBracket) return;
+
+  // TASK 11: Follow the creator of the selected bracket.
+  if (action.label === "Follow creator") {
+    // Authentication is required to create a follow relationship.
+    if (!session?.user?.id) {
+      setFollowFeedback({
+        type: "error",
+        message: "Please sign in to follow creators.",
+      });
+      return;
+    }
+
+    // A user must not be able to follow their own account.
+    if (session.user.id === selectedBracket.creator_id) {
+      setFollowFeedback({
+        type: "error",
+        message: "You cannot follow yourself.",
+      });
+      return;
+    }
+
+    setFollowLoading(true);
+    setFollowFeedback(null);
 
     try {
-      await Clipboard.setStringAsync(bracketLink);
-setSelectedBracket(null);
-router.push(`/bracket/${selectedBracket.id}`);
-    } catch {
-      console.error("Could not copy the bracket link.");
+      // Insert the authenticated follower and the bracket's creator.
+      const { error: followInsertError } = await supabase
+        .from("user_followers")
+        .insert({
+          follower_id: session.user.id,
+          following_id: selectedBracket.creator_id,
+        });
+
+      if (followInsertError) {
+        // PostgreSQL 23505 means the composite key already exists.
+        if (followInsertError.code === "23505") {
+          setFollowFeedback({
+            type: "error",
+            message: "You already follow this creator.",
+          });
+        } else {
+          console.error(
+            "[Task 11 / Follow Creator] Database insert failed:",
+            followInsertError
+          );
+
+          setFollowFeedback({
+            type: "error",
+            message:
+              followInsertError.message ||
+              "Could not follow this creator.",
+          });
+        }
+
+        return;
+      }
+
+      // Confirm success only after Supabase accepts the insert.
+      setFollowFeedback({
+        type: "success",
+        message: "You are now following this creator.",
+      });
+    } catch (followUnexpectedError: unknown) {
+      console.error(
+        "[Task 11 / Follow Creator] Unexpected error:",
+        followUnexpectedError
+      );
+
+      setFollowFeedback({
+        type: "error",
+        message: "Something went wrong. Please try again.",
+      });
+    } finally {
+      setFollowLoading(false);
     }
 
     return;
   }
 
+  // Preserve the existing copy-link and in-app navigation feature.
+  if (action.label === "Copy link") {
+    const bracketLink = `brackets://bracket/${selectedBracket.id}`;
+
+    try {
+      await Clipboard.setStringAsync(bracketLink);
+      setSelectedBracket(null);
+      router.push(`/bracket/${selectedBracket.id}`);
+    } catch (copyLinkError: unknown) {
+      console.error(
+        "[Bracket Menu / Copy Link] Clipboard operation failed:",
+        copyLinkError
+      );
+
+      setFollowFeedback({
+        type: "error",
+        message: "Could not copy the bracket link.",
+      });
+    }
+
+    return;
+  }
+
+  // Other viewer actions remain placeholders until implemented.
   console.log(
-    `Viewer action: ${action.label}; bracket: ${selectedBracket.id}`
+    `[Bracket Menu] Viewer action: ${action.label}; ` +
+      `bracket ID: ${selectedBracket.id}`
   );
+
   setSelectedBracket(null);
 }}
+
+        /* TASK 11: Prevent repeated follow requests while processing. */
+        disabled={action.label === "Follow creator" && followLoading}
+
         accessibilityRole="button"
         accessibilityLabel={action.label}
       >
@@ -484,7 +612,10 @@ router.push(`/bracket/${selectedBracket.id}`);
               : "text-gray-900 dark:text-white"
           }`}
         >
-          {action.icon} {action.label}
+          {action.icon}{" "}
+{action.label === "Follow creator" && followLoading
+  ? "Following..."
+  : action.label}
         </Text>
       </TouchableOpacity>
     ))}
